@@ -1,88 +1,135 @@
-import React, { useState } from 'react'
-import Navbar from '../../components/Navbar.jsx/Navbar'
-import PasswordInput from '../../components/Input/PasswordInput'
-import { Link } from 'react-router-dom'
-import { validateEmail } from '../../utils/helper'
+import React, { useState } from 'react';
+import Navbar from '../../components/Navbar.jsx/Navbar';
+import PasswordInput from '../../components/Input/PasswordInput';
+import { Link, useNavigate } from 'react-router-dom';
+import { validateEmail } from '../../utils/helper';
+import axiosInstance from '../../utils/axiosInstance';
+import loginImage from '../../assets/images/login.svg';  // استيراد الصورة
 
-
-/**
- * 
- * note : In the code you provided, the condition if (!name) checks whether the name variable is falsy. In JavaScript, several values are considered "falsy," including:
-
-null
-undefined
-"" (an empty string)
-0 (zero)
-NaN (not a number)
-false
- */
 const SignUp = () => {
-  const [name, setName] = useState("")
-  
-  const [email, setEmail] = useState("")
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
-  const [password, setPassword] = useState("")
-
-  const [error, setError] = useState(null)
-
-  const handleSignUp = (e) => {
-    e.preventDefault()
-    if (!name){
-      
-      setError("please enter your name")
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    if (!name) {
+      setError("Please enter your name");
       return;
     }
-    if(!validateEmail(email)){
-      setError("please enter a valid email")
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email");
       return;
-          //terminate the function immediately and return to parent caller 
     }
-    if (!password){
-      // we can make a regex for the password aswell 
-      setError("please enter a password")
+    if (!password) {
+      setError("Please enter a password");
       return;
     }
 
-    setError("")
-    // signUp API call
-  }
+    setError("");
+
+    try {
+      const response = await axiosInstance.post('/create-account', {
+        fullName: name,
+        email: email,
+        password: password,
+      });
+
+      if (response.data && response.data.error) {
+        setError(response.data.message);
+        return;
+      }
+
+      if (response.data && response.data.accessToken) {
+        localStorage.setItem('token', response.data.accessToken);
+        navigate('/dashboard');
+      }
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        setError(error.response.data.message);
+      } else {
+        setError("An unexpected error occurred. Please try again later");
+      }
+    }
+  };
+
   return (
-    <div>
-        <>
-       <Navbar/>
-       <div className="flex items-center justify-center mt-28">
-         <div className='w-96 border rounded bg-white px-7 py-10'>
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-50">
+      <Navbar />
+      <div className="flex items-center justify-center mt-20">
+        <div className="flex w-full max-w-4xl bg-white rounded-lg shadow-xl overflow-hidden">
+          {/* Image Section */}
+          <div className="hidden md:block w-1/2">
+            <img 
+              src={loginImage}
+              alt="Sign Up" 
+              className="object-cover w-full h-full"
+            />
+          </div>
+          
+          {/* Form Section */}
+          <div className="w-full md:w-1/2 p-8">
+            <form onSubmit={handleSignUp} className="space-y-6">
+              <h2 className="text-3xl font-bold text-center text-teal-600 mb-8">Sign Up for همّة - Himma</h2>
+              
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
+                <input
+                  type="text"
+                  id="name"
+                  placeholder="Enter your full name"
+                  className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                            focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
 
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+                <input
+                  type="text"
+                  id="email"
+                  placeholder="Enter your email"
+                  className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                            focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
 
-              <form onSubmit={handleSignUp}>
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+                <PasswordInput
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="mt-1 block w-full"
+                />
+              </div>
 
-                <h4 className="text-2xl mb-7">SignUp</h4>
+              {error && <p className="text-red-500 text-sm">{error}</p>}
 
-                <input type="text" placeholder="Name" className="input-box" 
-                value={name} onChange={(e)=>{setName(e.target.value)}}/>
+              <button
+                type="submit"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
+              >
+                Create Account
+              </button>
 
-                   <input type="text" placeholder="Email" className="input-box" value={email} onChange={(e)=>{setEmail(e.target.value)}}/>
-
-                <PasswordInput value={password} onChange={(e)=>{setPassword(e.target.value)}}/>
-                  {
-                    error && (
-                      <p className='text-red-500 text-xs pb-1'>{error}</p>
-                    )
-                  }
-
-                <button type='submit' className='btn-primary'>Create Account</button>
-
-                <p className="text-sm text-center mt-4">
-                  Already have an account ? {" "}
-                  <Link to={'/login'} className="font-medium text-primary underline">Log In</Link>
-                </p>
-                </form>
-                </div>
-                </div>
-                </>
+              <p className="text-sm text-center text-gray-600">
+                Already have an account?{" "}
+                <Link to="/login" className="font-medium text-teal-600 hover:text-teal-500">
+                  Log In
+                </Link>
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
+  );
+};
 
-  )
-}
-
-export default SignUp
+export default SignUp;

@@ -1,36 +1,36 @@
-import React, { useState } from 'react'
-import { BiSolidShow } from "react-icons/bi";
-import { BiSolidHide } from "react-icons/bi";
+import React, { useState } from 'react';
+import { BiSolidShow, BiSolidHide } from "react-icons/bi";
 
+const PasswordInput = ({ value, onChange, placeholder, className }) => {
+  const [isShowPassword, setIsShowPassword] = useState(false);
 
-// install react icons
+  const toggleShowPassword = () => {
+    setIsShowPassword(!isShowPassword);
+  };
 
-// here we made a div with similar styling to the input-box tag , to be able to display the icons correctly inside the box
-const PasswordInput = ({value,onChange,placeholder}) => {
-
-    const [isShowPassword, setIsShowPassword] = useState(false)
-    
-    const toggleShowPassword = () => { 
-        
-        setIsShowPassword(!isShowPassword)
-    }
   return (
-    <div className='flex items-center bg-transparent border-[1.5px] px-5 roun mb-3' >
-
-        <input className='w-full text-sm bg-transparent py-3 mr-3 rounded outline-none' value={value} onChange={onChange} placeholder={placeholder||"password"} type={isShowPassword?"text":"password"} />
-        {/* <button type='button' onClick={toggleShowPassword}>
-            {isShowPassword? <BiSolidHide /> : <BiSolidShow />}
-        </button> */}
-
-{
-            isShowPassword? <BiSolidHide className='text-primary' onClick={toggleShowPassword} /> :
-            <BiSolidShow className='text-gray-400' onClick={toggleShowPassword} />
-        }
-        
-        {/* not a button because it refreshes the page , directly use the icon //not in a button */}
-        {/* or in a button but specify the type to button  */}
+    <div className={`relative ${className}`}>
+      <input
+        className="w-full px-4 py-2 text-sm bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition duration-150 ease-in-out"
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder || "Enter password"}
+        type={isShowPassword ? "text" : "password"}
+      />
+      <button
+        type="button"
+        onClick={toggleShowPassword}
+        className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-teal-500 focus:outline-none"
+        aria-label={isShowPassword ? "Hide password" : "Show password"}
+      >
+        {isShowPassword ? (
+          <BiSolidHide className="w-5 h-5" />
+        ) : (
+          <BiSolidShow className="w-5 h-5" />
+        )}
+      </button>
     </div>
-  )
-}
+  );
+};
 
-export default PasswordInput
+export default PasswordInput;
