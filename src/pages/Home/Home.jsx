@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Navbar from "../../components/Navbar.jsx/Navbar";
 import NoteCard from "../../components/Cards/NoteCard";
 import { MdAdd } from "react-icons/md";
@@ -49,7 +49,8 @@ const Home = () => {
     });
   };
 
-  const getUserInfo = async () => {
+  // استخدام useCallback لتغليف getUserInfo
+  const getUserInfo = useCallback(async () => {
     try {
       const response = await axiosInstance.get("/get-user");
       if (response.data && response.data.user) {
@@ -61,7 +62,7 @@ const Home = () => {
         navigate("/login");
       }
     }
-  };
+  }, [navigate]);
 
   const getAllNotes = async () => {
     try {
@@ -121,10 +122,11 @@ const Home = () => {
     getAllNotes();
   };
 
+  // الآن، getUserInfo لن تتغير بين عمليات الريندر
   useEffect(() => {
     getAllNotes();
     getUserInfo();
-  }, []);
+  }, [getUserInfo]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-50">
@@ -157,7 +159,7 @@ const Home = () => {
             message={
               isSearch
                 ? "Oops! No Tasks found"
-                :"Click the 'Add' Button to jot down your ideas, thoughts, and reminders. Let's get started!"
+                : "Click the 'Add' Button to jot down your ideas, thoughts, and reminders. Let's get started!"
             }
           />
         )}
